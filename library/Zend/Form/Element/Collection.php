@@ -497,7 +497,6 @@ class Collection extends Fieldset
      */
     public function extract()
     {
-
         if ($this->object instanceof Traversable) {
             $this->object = ArrayUtils::iteratorToArray($this->object, false);
         }
@@ -507,42 +506,10 @@ class Collection extends Fieldset
         }
 
         $values = array();
-
         foreach ($this->object as $key => $value) {
-            if ($this->hydrator) {
-                $values[$key] = $this->hydrator->extract($value);
-            } elseif ($value instanceof $this->targetElement->object) {
-                // @see https://github.com/zendframework/zf2/pull/2848
-                $targetElement = clone $this->targetElement;
-                $targetElement->object = $value;
-                $values[$key] = $targetElement->extract();
-                if (!$this->createNewObjects() && $this->has($key)) {
-                    $fieldset = $this->get($key);
-                    if ($fieldset instanceof Fieldset && $fieldset->allowObjectBinding($value)) {
-                        $fieldset->setObject($value);
-                    }
-                }
-            }
-        }
-
-        foreach ($values as $name => $object) {
-            $fieldset = $this->addNewTargetElementInstance($name);
-
-            if ($fieldset->allowObjectBinding($object)) {
-                $fieldset->setObject($object);
-                $values[$name] = $fieldset->extract();
-            } else {
-                foreach ($fieldset->fieldsets as $childFieldset) {
-                    $childName = $childFieldset->getName();
-                    if (isset($object[$childName])) {
-                        $childObject = $object[$childName];
-                        if ($childFieldset->allowObjectBinding($childObject)) {
-                            $childFieldset->setObject($childObject);
-                            $values[$name][$childName] = $childFieldset->extract();
-                        }
-                    }
-                }
-            }
+            $targetElement = clone $this->targetElement;
+            $targetElement->setObject($value);
+            $values[$key] = $targetElement->extract();
         }
 
         return $values;

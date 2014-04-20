@@ -455,28 +455,6 @@ class CollectionTest extends TestCase
         $this->assertSame($expected, $test);
     }
 
-    public function testExtractThroughCustomHydrator()
-    {
-        $collection = $this->form->get('fieldsets');
-        $this->prepareForExtract($collection);
-
-        $mockHydrator = $this->getMock('Zend\Stdlib\Hydrator\HydratorInterface');
-        $mockHydrator->expects($this->exactly(2))
-                     ->method('extract')
-                     ->will($this->returnCallback(function ($object) {
-                         return $object->field . '_foo';
-                     }));
-
-        $collection->setHydrator($mockHydrator);
-
-        $expected = array(
-            'obj2' => 'fieldOne_foo',
-            'obj3' => 'fieldTwo_foo',
-        );
-
-        $this->assertEquals($expected, $collection->extract());
-    }
-
     public function testExtractFromTraversable()
     {
         $collection = $this->form->get('fieldsets');
